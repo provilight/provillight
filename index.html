@@ -2083,6 +2083,16 @@ var positionsEtoiles=[];
 var etoiles=[];
 var canvasG,ctxG,animId;
 var synth=window.speechSynthesis||null;
+// Forcer la réinitialisation si synth est null
+if(!synth && window.speechSynthesis){synth=window.speechSynthesis;}
+
+// Précharger les voix dès que possible
+if(synth){
+  synth.getVoices();
+  if(synth.onvoiceschanged !== undefined){
+    synth.onvoiceschanged = function(){synth.getVoices();};
+  }
+}
 var toastTimer;
 
 // ═══════════════════════════════════════════════════════════
@@ -3090,7 +3100,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 function ecouterMessageAccueil(){
-  if(!synth){showToast(t('audio_indispo'));return;}
+  synth=window.speechSynthesis||synth;if(!synth){showToast(t('audio_indispo'));return;}
   var btn=document.getElementById('btn-message-accueil');
   var langue=LANGUE_ACTIVE;
   // Pour le créole : voix et texte en français (pas de voix créole native)
@@ -3822,7 +3832,7 @@ function majVitesse(v){
 }
 
 function lire(){
-  if(!synth){showToast(t('audio_indispo'));return;}
+  synth=window.speechSynthesis||synth;if(!synth){showToast(t('audio_indispo'));return;}
   if(!provisionActuelle){showToast(t('choisir_etoile'));return;}
   stopper();
   if(!voixChoisie){chargerVoix();setTimeout(lire,900);return;}
@@ -4545,7 +4555,7 @@ function _lireAccueilEchoMultilingue(){
     es:"Bienvenido al Eco de Gloria. Aquí, cada testimonio es una piedra viva sobre el Muro de la Providencia."
   };
   var langVocal=(LANGUE_ACTIVE==='ht')?'fr':LANGUE_ACTIVE;
-  var texteVocal=msgs[LANGUE_ACTIVE]||msgs['fr'];
+  var texteVocal=msgs[(LANGUE_ACTIVE==='ht')?'fr':LANGUE_ACTIVE]||msgs['fr'];
   try{
     stopper();
     var u=new SpeechSynthesisUtterance(texteVocal);
